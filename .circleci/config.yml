@@ -182,6 +182,13 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
+      - run:
+          name: Install aws cli for rollback
+          command: |
+            apk add --no-cache python3 py3-pip \
+            && pip3 install --upgrade pip \
+            && pip3 install --no-cache-dir awscli \
+            && rm -rf /var/cache/apk/*
       - destroy-environment
 
 #   run-migrations:
