@@ -162,27 +162,27 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
 
-  configure-infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["9b:e3:1a:5f:ac:e5:aa:9e:4b:a1:71:f9:cd:77:33:d2"]
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update ansible openssh-client tar gzip curl nodejs npm
-            pip install awscli
-            cat .circleci/ansible/inventory.txt
-      - run:
-          name: Configure server
-          command: |
-            export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-      - destroy-environment
+  # configure-infrastructure:
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: ["9b:e3:1a:5f:ac:e5:aa:9e:4b:a1:71:f9:cd:77:33:d2"]
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --update ansible openssh-client tar gzip curl nodejs npm
+  #           pip install awscli
+  #           cat .circleci/ansible/inventory.txt
+  #     - run:
+  #         name: Configure server
+  #         command: |
+  #           export ANSIBLE_HOST_KEY_CHECKING=False
+  #           ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+  #     - destroy-environment
 
   run-migrations:
     docker:
@@ -194,10 +194,9 @@ jobs:
       - run:
           name: Install aws cli for rollback
           command: |
-            apt-get update && \
-            apt-get install -y python3 python3-pip python3-setuptools groff less && \
+            sudo apt-get update && \
+            sudo apt-get install -y python3 python3-pip python3-setuptools groff less && \
             pip3 install --upgrade pip && \
-            apt-get clean && \
             pip3 --no-cache-dir install --upgrade awscli
       - run:
           name: Run migrations
@@ -219,38 +218,40 @@ jobs:
             fi
       - destroy-environment 
 
-  # deploy-frontend:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible openssh-client tar gzip curl nodejs npm
-  #           pip install awscli
-  #           cat .circleci/ansible/inventory.txt
-  #     - run:
-  #         name: Get backend url
-  #         command: |
-  #           export BACKEND_IP=$(aws ec2 describe-instances \
-  #             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-  #             --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-  #             --output text)
-  #           export API_URL="http://${BACKEND_IP}:3030"
-  #           echo "API_URL = ${API_URL}"
-  #           echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-  #           cat frontend/.env
-  #     - run:
-  #         name: Deploy frontend objects
-  #         command: |
-  #           cd frontend
-  #           npm install
-  #           npm run build
-  #           tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-  #           aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-  #     - revert-migrations
-  #     - destroy-environment    
+  deploy-frontend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible openssh-client tar gzip curl nodejs npm
+            pip install awscli
+            cat .circleci/ansible/inventory.txt
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - revert-migrations
+      - destroy-environment    
                     
   # deploy-backend:
   #   docker:
