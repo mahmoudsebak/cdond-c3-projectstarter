@@ -255,6 +255,14 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - run:
+          name: Install aws cli for rollback
+          command: |
+            apk add --no-cache python3 py3-pip \
+            && pip3 install --upgrade pip \
+            && pip3 install --no-cache-dir awscli \
+            && rm -rf /var/cache/apk/*
+          when: on_fail
       - destroy-environment      
                     
 #   deploy-backend:
@@ -356,8 +364,8 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-      - deploy-backend:
-          requires: [run-migrations]
+      # - deploy-backend:
+      #     requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
