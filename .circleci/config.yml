@@ -162,27 +162,27 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
 
-  # configure-infrastructure:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints: ["9b:e3:1a:5f:ac:e5:aa:9e:4b:a1:71:f9:cd:77:33:d2"]
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible openssh-client tar gzip curl nodejs npm
-  #           pip install awscli
-  #           cat .circleci/ansible/inventory.txt
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           export ANSIBLE_HOST_KEY_CHECKING=False
-  #           ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-  #     - destroy-environment
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["9b:e3:1a:5f:ac:e5:aa:9e:4b:a1:71:f9:cd:77:33:d2"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible openssh-client tar gzip curl nodejs npm
+            pip install awscli
+            cat .circleci/ansible/inventory.txt
+      - run:
+          name: Configure server
+          command: |
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+      - destroy-environment
 
   run-migrations:
     docker:
@@ -253,43 +253,26 @@ jobs:
       - revert-migrations
       - destroy-environment    
                     
-  # deploy-backend:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints: ["9b:e3:1a:5f:ac:e5:aa:9e:4b:a1:71:f9:cd:77:33:d2"]
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible openssh-client tar gzip curl nodejs npm
-  #           pip install awscli
-  #     - run:
-  #         name: Deploy backend
-  #         command: |
-  #           cd backend
-  #           npm i
-  #           npm run build
-  #           cd ..
-  #           # Zip the directory
-  #           tar -C backend -czvf artifact.tar.gz .
-  #           cd .circleci/ansible
-  #           echo "Contents  of the inventory.txt file is -------"
-  #           cat inventory.txt
-  #           ansible-playbook -i inventory.txt deploy-backend.yml
-  #     - run:
-  #         name: Install aws cli for rollback
-  #         command: |
-  #           apk add --no-cache python3 py3-pip \
-  #           && pip3 install --upgrade pip \
-  #           && pip3 install --no-cache-dir awscli \
-  #           && rm -rf /var/cache/apk/*
-  #         when: on_fail
-  #     - revert-migrations
-  #     - destroy-environment 
+  deploy-backend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["9b:e3:1a:5f:ac:e5:aa:9e:4b:a1:71:f9:cd:77:33:d2"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible openssh-client tar gzip curl nodejs npm
+            pip install awscli
+      - run:
+          name: Deploy backend
+          command: |
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      - revert-migrations
+      - destroy-environment 
 
 #   smoke-test:
 #     docker:
