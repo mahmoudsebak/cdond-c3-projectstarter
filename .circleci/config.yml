@@ -351,7 +351,7 @@ jobs:
             WorkflowID=$(aws cloudformation \
               list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
               --no-paginate --output text)
-            curl --insecure https://kvdb.io/ViP8niYFueuY8R8WawbnHH/WorkflowID  -d '$WorkflowID'
+            curl --insecure https://kvdb.io/ViP8niYFueuY8R8WawbnHH/WorkflowID  -d "$WorkflowID"
       - run:
           name: Update cloudfront distribution
           command: |
