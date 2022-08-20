@@ -1,1 +1,2 @@
 Public Url to GitHub repository [URL01]: https://github.com/mahmoudsebak/cdond-c3-projectstarter
+Public URL to S3 Bucket [URL02]: 

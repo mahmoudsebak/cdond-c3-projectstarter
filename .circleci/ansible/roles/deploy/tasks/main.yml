@@ -1,38 +1,23 @@
-- name: "update apt packages."
-  become: yes
-  apt:
-    update_cache: yes
+- name: Creates directory
+  file:
+    path: ~/backend
+    state: directory
 
-- name: "upgrade packages"
-  become: yes
-  apt:
-    upgrade: yes
+- name: Extract backend
+  become_user: ubuntu
+  unarchive:
+    src: /home/backend.tar.gz
+    dest: ~/backend
 
-- name: remove dependencies that are no longer required
-  become: yes
-  apt:
-    autoremove: yes
+- name: Install dependencies
+  become: true
+  shell: |
+    cd ~/backend
+    sudo npm install
 
-- name: "install dependencies."
-  become: yes
-  apt:
-    name: ["nodejs", "npm"]
-    state: latest
-    update_cache: yes
-
-- name: "install pm2"
-  become: yes
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-
-  # cd backend
-  # npm i
-  # npm run build
-  # cd ..
-  # # Zip the directory
-  # tar -C backend -czvf artifact.tar.gz .
-  # cd .circleci/ansible
-  # echo "Contents  of the inventory.txt file is -------"
-  # cat inventory.txt
+- name: Build and run PM2 server
+  shell: |
+    cd ~/backend
+    sudo npm run build
+    pm2 stop default
+    pm2 start npm -- start
