@@ -384,7 +384,7 @@ jobs:
             echo Stack names: "${STACKS[@]}"
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
-              echo "---------------------Delete confirmed"---------------------"
+              echo "---------------------Delete confirmed---------------------"
               echo "Deleting ${OldWorkflowID}"
               aws s3 rm s3://udapeople-${OldWorkflowID} --recursive
               aws cloudformation delete-stack --stack-name backend-${OldWorkflowID}
