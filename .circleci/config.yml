@@ -22,7 +22,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS = $(curl --insecure https://kvdb.io/ViP8niYFueuY8R8WawbnHH/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            export SUCCESS=$(curl --insecure https://kvdb.io/ViP8niYFueuY8R8WawbnHH/migration_${CIRCLE_WORKFLOW_ID:0:7})
             if(( $SUCCESS==1 )); 
             then
                 cd ~/project/backend
@@ -180,8 +180,9 @@ jobs:
       - run:
           name: Configure server
           command: |
+            cd ~/project/.circleci/ansible
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
 
   run-migrations:
@@ -271,7 +272,6 @@ jobs:
           name: Build backend
           command: |
             cd backend
-            cat .env
             npm install
             npm run build
             tar -pczvf /home/backend.tar.gz .
@@ -279,6 +279,7 @@ jobs:
           name: Deploy backend
           command: |
             cd ~/project/.circleci/ansible
+            export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i inventory.txt deploy-backend.yml
       - revert-migrations
       - destroy-environment 
