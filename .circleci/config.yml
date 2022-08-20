@@ -10,6 +10,7 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
+            aws s3 rm --recursive s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -272,13 +273,14 @@ jobs:
           name: Build backend
           command: |
             cd backend
-            npm install
+            npm i
             npm run build
-            tar -pczvf /home/backend.tar.gz .
+            cd ..
+            tar -C backend -pczvf /home/backend.tar.gz .
       - run:
           name: Deploy backend
           command: |
-            cd ~/project/.circleci/ansible
+            cd .circleci/ansible
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i inventory.txt deploy-backend.yml
       - revert-migrations
