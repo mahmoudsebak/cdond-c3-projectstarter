@@ -2,3 +2,4 @@ Public URL to GitHub repository [URL01]: https://github.com/mahmoudsebak/cdond-c
 Public URL to S3 Bucket [URL02]: http://udapeople-3468454.s3-website-us-east-1.amazonaws.com/index.html # to be updated with actual one
 Public URL to CloudFront domain name [URL03]: d1xc97dn772mp1.cloudfront.net # to be updated with actual one
 Public URL to Application Backend [URL04]: http://ec2-3-125-115-11.eu-central-1.compute.amazonaws.com:3030/api/status # to be updated with actual one
+Public URL to your Prometheus Server [URL05]: http://ec2-54-234-219-18.compute-1.amazonaws.com:9090
